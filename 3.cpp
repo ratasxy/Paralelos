@@ -23,7 +23,7 @@ int main(int argc, char** argv)
     string data;
     int tmp, tmp2;
     int size;
-    int sum = 0;
+    int sum = 1;
 
     int world_size;
     MPI_Comm_size(MPI_COMM_WORLD, &world_size);
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
         for(int i=1;i<world_size-1;i++)
         {
 		MPI_Send(&size, 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-		MPI_Send(&data[tmp], size/(world_size-1), MPI_INT, i, 0, MPI_COMM_WORLD);
+		MPI_Send(&data[tmp], size/(world_size-1), MPI_CHAR, i, 0, MPI_COMM_WORLD);
 
 		tmp += size/(world_size-1);
 
@@ -49,10 +49,16 @@ int main(int argc, char** argv)
 	cout << "Palabras: " << sum << endl;
     }else{
 	MPI_Recv(&size, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	MPI_Recv(&data, size/(world_size-1), MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-	tmp2 = countString(data); 
-	MPI_Send(&tmp, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+	int size2 = (size/(world_size-1))+1;
+	char texto[size2];
+	MPI_Recv(&texto, size/(world_size-1), MPI_CHAR, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	string tmp3(texto);
+
+	//cout << "--- " << texto << endl;
+	tmp2 = countString(string(tmp3));
+	//cout << " ans: " << tmp2 << endl; 
+	MPI_Send(&tmp2, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
     MPI_Finalize();
